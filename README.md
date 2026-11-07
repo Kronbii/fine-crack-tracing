@@ -3,7 +3,7 @@
 Turns a crack segmentation mask into measured centrelines: where each crack runs, how long it is, how wide it is at every point along it, where it branches, and where the mask broke it.
 
 [![tests](https://github.com/Kronbii/fine-crack-tracing/actions/workflows/tests.yml/badge.svg)](https://github.com/Kronbii/fine-crack-tracing/actions/workflows/tests.yml)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](pyproject.toml)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ![A cracked concrete wall with its crack traced as a line coloured by width, branches marked with rings, and short dashed stretches where breaks in the mask were joined](docs/media/hero.jpg)
@@ -80,7 +80,7 @@ On real masks there is no true line to score against, so I ran two checks on all
 
 ## Quick start
 
-Python 3.9 or newer.
+Python 3.10 or newer.
 
 ```bash
 git clone https://github.com/Kronbii/fine-crack-tracing.git

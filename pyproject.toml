@@ -9,7 +9,7 @@ description = "Turn crack segmentation masks into measured centrelines: length, 
 readme = "README.md"
 authors = [{ name = "Rami Kronbi" }]
 license = { text = "MIT" }
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = [
   "crack-detection",
   "crack-width",
@@ -48,7 +48,7 @@ where = ["src"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
