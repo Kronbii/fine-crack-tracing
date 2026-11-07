@@ -4,13 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fine-tracing"
-version = "0.1.0"
-description = "Fine crack tracing and metrics toolkit"
+version = "1.0.0"
+description = "Turn crack segmentation masks into measured centrelines: length, width along the crack, branches, gaps, overlays and scores."
 readme = "README.md"
-authors = [ { name = "Kronbii" } ]
+authors = [{ name = "Rami Kronbi" }]
 license = { text = "MIT" }
-requires-python = ">=3.8"
-keywords = ["computer-vision", "crack-detection", "image-processing", "metrics", "opencv"]
+requires-python = ">=3.10"
+keywords = [
+  "crack-detection",
+  "crack-width",
+  "skeletonization",
+  "centerline",
+  "infrastructure-inspection",
+  "computer-vision",
+  "opencv",
+]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
@@ -18,13 +26,19 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Image Processing",
 ]
 dependencies = [
-  "numpy>=1.26.0",
-  "opencv-python>=4.6.0",
-  "networkx>=3.0",
-  "pandas",
-  "matplotlib",
-  "scipy",
+  "numpy>=1.23",
+  "scipy>=1.9",
+  "opencv-python-headless>=4.6",
+  "scikit-image>=0.21",
 ]
+
+[project.optional-dependencies]
+bench = ["matplotlib>=3.5"]
+dev = ["pytest>=7", "ruff>=0.4", "matplotlib>=3.5"]
+
+[project.urls]
+Homepage = "https://ramikronbi.com/projects/fine-crack-tracing-toolkit"
+Repository = "https://github.com/Kronbii/fine-crack-tracing"
 
 [project.scripts]
 fine-tracing = "fine_tracing.cli:main"
@@ -33,10 +47,9 @@ fine-tracing = "fine_tracing.cli:main"
 where = ["src"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
+target-version = "py310"
 
-[tool.mypy]
-python_version = "3.11"
-ignore_missing_imports = true
-strict = false
-
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E741"]
