@@ -1,22 +1,17 @@
-"""Fine Tracing - crack tracing & metrics toolkit.
+"""fine-tracing: turn crack masks into measured centrelines.
 
-Public submodules:
-    config
-    preprocessing
-    edge
-    process
-    metrics
-    utils
-
-CLI entrypoint provided via fine-tracing command (see cli module).
+>>> from fine_tracing import trace
+>>> result = trace(mask, image=photo, px_size=0.1)   # 0.1 mm per pixel
+>>> for crack in result.cracks:
+...     print(crack.id, crack.length, crack.width_stats()["max"])
 """
-from . import config, preprocessing, edge, process_corners as process, metrics, utils  # re-export for convenience
 
-__all__ = [
-    "config",
-    "preprocessing",
-    "edge",
-    "process",
-    "metrics",
-    "utils",
-]
+from __future__ import annotations
+
+__version__ = "1.0.0"
+
+from .config import TraceConfig  # noqa: E402
+from .pipeline import trace  # noqa: E402
+from .result import Crack, Path, TraceResult  # noqa: E402
+
+__all__ = ["trace", "TraceConfig", "TraceResult", "Crack", "Path", "__version__"]

@@ -1,6 +1,0 @@
-numpy==1.26.4
-opencv-python==4.6.0.66
-networkx==3.4.2
-pandas
-matplotlib
-scipy

@@ -1,28 +1,22 @@
-/masks
-/NRV0719
-/test_masks
-/used_masks
-/used-masks
-/test-masks
-/results
-/fine-crack-venv
-/drawn-cracks
-/papers
-/.vscode
-/test
+# outputs
+/results/
+/bench/
+/scores/
+/data/
 
-# Added standard Python ignores
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
 build/
 dist/
 *.egg-info/
 .eggs/
 .venv/
 venv/
-logging.log
-*.csv
-*.json
+.pytest_cache/
+.ruff_cache/
+
+# editors and OS
 .idea/
+.vscode/
 .DS_Store
