@@ -99,3 +99,13 @@ def test_v01_spellings_still_work(tmp_path, capsys):
     assert main(legacy_metrics + ["--output-dir", str(tmp_path / "s")]) == 0
     scores = json.loads((tmp_path / "s" / "scores.json").read_text())
     assert scores["mean"]["f1"] == 1.0
+
+
+def test_help_lists_only_current_commands(capsys):
+    with pytest.raises(SystemExit):
+        main(["--help"])
+    out = capsys.readouterr().out
+    assert "SUPPRESS" not in out
+    for cmd in ("trace", "eval", "synth", "bench"):
+        assert cmd in out
+    assert "run" not in out.split("examples:")[0].replace("fine-tracing", "")

@@ -17,6 +17,30 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - run: pip install -e ".[dev]"
-      - run: ruff check src tests scripts
+      - run: ruff check src tests scripts examples
+      - run: ruff format --check src tests scripts examples
       - run: pytest -q
+
+  package:
+    # build the wheel, install it on its own, and trace the examples with it
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build && python -m build
+      - run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install dist/*.whl
+          /tmp/clean/bin/fine-tracing --version
+          /tmp/clean/bin/fine-tracing trace examples/masks --photos examples/photos -o /tmp/out
+          test -s /tmp/out/cracks.csv
+          cd /tmp && /tmp/clean/bin/python "$GITHUB_WORKSPACE/examples/quickstart.py"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "fine-crack-tracing: crack segmentation masks to measured centrelines"
+type: software
+authors:
+  - given-names: Rami
+    family-names: Kronbi
+    website: "https://ramikronbi.com"
+version: 1.0.0
+date-released: 2026-11-07
+license: MIT
+repository-code: "https://github.com/Kronbii/fine-crack-tracing"
+url: "https://ramikronbi.com/projects/fine-crack-tracing-toolkit"
+abstract: >-
+  A Python package and command-line tool that turns crack segmentation masks
+  into measured centrelines. Each crack is skeletonised and read as a graph,
+  spurs are pruned against the crack's width, breaks are bridged, and the width
+  across the crack is measured at every point to sub-pixel, with a Shi-Tomasi
+  corner tracer as the fallback. Includes a synthetic benchmark with exact
+  ground truth.
+keywords:
+  - crack detection
+  - crack width
+  - skeletonization
+  - centerline extraction
+  - infrastructure inspection
+  - computer vision
