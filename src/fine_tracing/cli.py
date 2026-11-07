@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from . import __version__
 from .config import METHODS, TraceConfig
+from .result import finite
 
 FORMATS = ("overlay", "json", "csv", "geojson", "svg", "centreline")
 
@@ -86,7 +87,7 @@ def _trace_one(job) -> Dict[str, Any]:
         res.to_json(os.path.join(out, "json", name + ".json"))
     if "geojson" in formats:
         with open(os.path.join(out, "geojson", name + ".geojson"), "w") as f:
-            json.dump(res.to_geojson(), f)
+            json.dump(finite(res.to_geojson()), f, allow_nan=False)
     if "svg" in formats:
         with open(os.path.join(out, "svg", name + ".svg"), "w") as f:
             f.write(res.to_svg())
@@ -97,6 +98,7 @@ def _trace_one(job) -> Dict[str, Any]:
     if "centreline" in formats:
         cv2.imwrite(os.path.join(out, "centrelines", name + ".png"), centreline_image(res))
     return dict(
+        timings={k: round(v * 1000, 1) for k, v in res.timings.items()},
         name=name,
         rows=res.rows(),
         summary=res.to_dict(geometry=False)["summary"],
@@ -142,12 +144,12 @@ def cmd_trace(a: argparse.Namespace) -> int:
         with ProcessPoolExecutor(max_workers=workers) as ex:
             for r in ex.map(_trace_one, jobs):
                 results.append(r)
-                _report(r, a.quiet)
+                _report(r, a.quiet, getattr(a, "verbose", 0))
     else:
         for j in jobs:
             r = _trace_one(j)
             results.append(r)
-            _report(r, a.quiet)
+            _report(r, a.quiet, getattr(a, "verbose", 0))
     wall = time.perf_counter() - t0
 
     rows = [row for r in results for row in r["rows"]]
@@ -173,7 +175,7 @@ def cmd_trace(a: argparse.Namespace) -> int:
         "per_image": {r["name"]: r["summary"] for r in results},
     }
     with open(os.path.join(out, "summary.json"), "w") as f:
-        json.dump(summary, f, indent=1)
+        json.dump(finite(summary), f, indent=1, allow_nan=False)
     if not a.quiet:
         print(
             f"\n{len(results)} image(s), {len(rows)} crack(s), {summary['mean_ms_per_image']:.0f} ms per image -> {out}"
@@ -185,9 +187,11 @@ def _floats_or_names(s: str) -> List[str]:
     return [v.strip() for v in s.split(",") if v.strip()]
 
 
-def _report(r: Dict[str, Any], quiet: bool) -> None:
+def _report(r: Dict[str, Any], quiet: bool, verbose: int = 0) -> None:
     if quiet:
         return
+    if verbose:
+        print("  " + "  ".join(f"{k} {v:.0f} ms" for k, v in r["timings"].items()), file=sys.stderr)
     s = r["summary"]
     unit = r["unit"]
     if r["px"] is not None:
@@ -228,7 +232,7 @@ def cmd_eval(a: argparse.Namespace) -> int:
         w.writeheader()
         w.writerows(rows)
     with open(os.path.join(a.output, "scores.json"), "w") as f:
-        json.dump({"tolerance_px": a.tol, "mean": mean, "images": rows}, f, indent=1)
+        json.dump(finite({"tolerance_px": a.tol, "mean": mean, "images": rows}), f, indent=1, allow_nan=False)
     print(f"{len(rows)} image(s) scored at {a.tol:g} px")
     for k, v in mean.items():
         print(f"  {k:<20} {v:8.4f}")
@@ -265,9 +269,18 @@ def cmd_run_legacy(a: argparse.Namespace) -> int:
     return cmd_trace(ns)
 
 
+def cmd_metrics_legacy(a: argparse.Namespace) -> int:
+    """v0.1 spelling: ``metrics --ground-truth --generated --output-dir``."""
+    print("note: `metrics` is the v0.1 spelling; use `fine-tracing eval`", file=sys.stderr)
+    ns = argparse.Namespace(pred=a.generated, truth=a.ground_truth, output=a.output_dir, tol=3.0)
+    return cmd_eval(ns)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="fine-tracing", description="Turn crack masks into measured centrelines.")
     p.add_argument("--version", action="version", version=f"fine-tracing {__version__}")
+    # v0.1 took -v/-vv before the subcommand; it is accepted and shows stage timings
+    p.add_argument("-v", "--verbose", action="count", default=0, help=argparse.SUPPRESS)
     sub = p.add_subparsers(dest="command", required=True)
 
     t = sub.add_parser("trace", help="trace the cracks in a mask, or a folder of masks")
@@ -325,11 +338,23 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--masks-dir", required=True)
     r.add_argument("--output-dir", required=True)
     r.set_defaults(func=cmd_run_legacy)
+
+    mt = sub.add_parser("metrics", help=argparse.SUPPRESS)
+    mt.add_argument("--ground-truth", required=True)
+    mt.add_argument("--generated", required=True)
+    mt.add_argument("--output-dir", default="scores")
+    mt.set_defaults(func=cmd_metrics_legacy)
     return p
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
+    old_env = sorted(k for k in os.environ if k.startswith("FINE_TRACING_"))
+    if old_env:
+        print(
+            f"note: {', '.join(old_env)} no longer change anything; use command-line flags or --config",
+            file=sys.stderr,
+        )
     return args.func(args)
 
 

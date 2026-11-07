@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 import cv2
 import numpy as np
 
+from .mask import to_uint8
 from .result import TraceResult
 
 # thin -> wide: mint green, yellow, magenta (RGB)
@@ -44,7 +45,7 @@ def _dashed(img, a, b, color, thick, dash):
 def _base(result: TraceResult, image: Optional[np.ndarray], show_mask: bool, dim: float) -> np.ndarray:
     H, W = result.shape
     if image is not None:
-        img = np.asarray(image)
+        img = to_uint8(np.asarray(image))
         if img.ndim == 2:
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         img = img[..., :3].astype(np.float32)

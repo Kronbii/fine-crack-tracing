@@ -15,6 +15,29 @@ def _r(a, nd: int = 2):
     return np.round(np.asarray(a, float), nd).tolist()
 
 
+def _num(v, nd: int = 3):
+    """A finite number rounded, or None (JSON has no NaN)."""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return round(f, nd) if np.isfinite(f) else None
+
+
+def finite(obj):
+    """Replace every NaN or infinity in a JSON-bound structure with None."""
+    if isinstance(obj, dict):
+        return {k: finite(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [finite(v) for v in obj]
+    if isinstance(obj, (float, np.floating)):
+        f = float(obj)
+        return f if np.isfinite(f) else None
+    if isinstance(obj, np.integer):
+        return int(obj)
+    return obj
+
+
 @dataclass
 class Path:
     """One run of a crack: the trunk, or a branch off another path."""
@@ -139,14 +162,19 @@ class Crack:
         }
 
     def width_class_lengths(self, edges_px: Sequence[float]) -> List[float]:
-        """Crack length whose width falls in each class [e_i, e_i+1)."""
+        """Crack length whose width falls in each class [e_i, e_i+1).
+
+        Bridged stretches are left out; junction zones take the width of the
+        crack on either side."""
         bounds = [0.0, *edges_px, np.inf]
         out = [0.0] * (len(bounds) - 1)
         for p in self.paths:
             if len(p.points) < 2:
                 continue
             seg = p.seg_lengths
-            wmid = 0.5 * (p.width[:-1] + p.width[1:])
+            # junction zones are not measured; class them by the width either side
+            wf = p.width_filled() if np.isfinite(p.width).any() else p.width
+            wmid = 0.5 * (wf[:-1] + wf[1:])
             for k in range(len(out)):
                 sel = (~p.bridged) & np.isfinite(wmid) & (wmid >= bounds[k]) & (wmid < bounds[k + 1])
                 out[k] += float(seg[sel].sum())
@@ -227,10 +255,10 @@ class TraceResult:
             "length_px": round(c.length, 2),
             "gaps": c.gaps,
             "gap_px": round(c.gap_length, 2),
-            "mean_width_px": round(ws["mean"], 3),
-            "median_width_px": round(ws["median"], 3),
-            "p95_width_px": round(ws["p95"], 3),
-            "max_width_px": round(ws["max"], 3),
+            "mean_width_px": _num(ws["mean"]),
+            "median_width_px": _num(ws["median"]),
+            "p95_width_px": _num(ws["p95"]),
+            "max_width_px": _num(ws["max"]),
             "branches": len(c.paths) - 1,
             "junctions": len(c.junctions),
             "endpoints": len(c.endpoints),
@@ -316,7 +344,7 @@ class TraceResult:
         }
 
     def to_json(self, path: Optional[str] = None, geometry: bool = True) -> str:
-        s = json.dumps(self.to_dict(geometry), indent=1)
+        s = json.dumps(finite(self.to_dict(geometry)), indent=1, allow_nan=False)
         if path:
             with open(path, "w") as f:
                 f.write(s)

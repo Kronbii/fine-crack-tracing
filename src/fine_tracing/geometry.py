@@ -106,7 +106,7 @@ def cross_widths(
         V = nrm[a:b]
         xs = P[:, 0, None] + s[None, :] * V[:, 0, None]
         ys = P[:, 1, None] + s[None, :] * V[:, 1, None]
-        f = map_coordinates(m, [ys.ravel(), xs.ravel()], order=1, mode="constant", cval=0.0)
+        f = map_coordinates(m, [ys.ravel(), xs.ravel()], order=1, mode="grid-constant", cval=0.0)
         f = f.reshape(len(P), K)
         inside = f >= 0.5
         J = np.arange(K)[None, :]

@@ -25,8 +25,8 @@ A rebuild around the approach the toolkit ended up with in practice: skeletonise
 ### Changed
 
 - Settings are a `TraceConfig` object, CLI flags or a JSON file instead of module globals and environment variables.
-- `fine-tracing run --frames-dir --masks-dir --output-dir` still works and maps to `fine-tracing trace`.
-- Masks can be binary, grey, colour (red on black counts), RGBA or probability maps, with an optional hysteresis threshold.
+- The v0.1 spellings still work: `fine-tracing -v run --frames-dir --masks-dir --output-dir` maps to `fine-tracing trace`, and `fine-tracing metrics --ground-truth --generated` to `fine-tracing eval`. The old `FINE_TRACING_*` environment variables are no longer read; the command says so if any are set.
+- Masks can be binary, 0/1 label maps, grey, colour (red on black counts), RGBA or probability maps, with an optional hysteresis threshold. Photos can be 8-bit, 16-bit or float.
 - Dependencies: `scikit-image` added; `networkx`, `pandas` and `matplotlib` dropped from the core (matplotlib is only needed for benchmark charts).
 
 ### Fixed

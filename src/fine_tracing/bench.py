@@ -20,6 +20,7 @@ import numpy as np
 
 from .config import TraceConfig
 from .metrics import densify, evaluate, lines_from_dict
+from .result import finite
 
 TRACERS: Dict[str, Tuple[str, Dict[str, Any]]] = {
     "v0.1 ORB, y-order": ("legacy", dict(detection="orb", sort="classic")),
@@ -161,11 +162,18 @@ def run(
         f.write(_markdown(summary, presets, n, size))
     with open(os.path.join(out, "summary.json"), "w") as f:
         json.dump(
-            dict(
-                images_per_preset=n, size=size, seed=seed, seconds=round(time.perf_counter() - t0, 1), summary=summary
+            finite(
+                dict(
+                    images_per_preset=n,
+                    size=size,
+                    seed=seed,
+                    seconds=round(time.perf_counter() - t0, 1),
+                    summary=summary,
+                )
             ),
             f,
             indent=1,
+            allow_nan=False,
         )
     try:
         _charts(out, summary, sweep_rows, presets, tracers)

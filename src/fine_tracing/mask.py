@@ -12,7 +12,7 @@ from scipy import ndimage as ndi
 def to_float(mask: np.ndarray) -> np.ndarray:
     """Return a single-channel crack map scaled to [0, 1].
 
-    Accepts boolean, 8/16-bit and float masks, grey or colour. A colour mask
+    Accepts boolean, 0/1 label, 8/16-bit and float masks, grey or colour. A colour mask
     (red on black, say) counts its brightest channel; an RGBA mask with a real
     alpha channel uses the alpha.
     """
@@ -26,11 +26,36 @@ def to_float(mask: np.ndarray) -> np.ndarray:
     if m.dtype == bool:
         return m.astype(np.float32)
     if np.issubdtype(m.dtype, np.integer):
-        full = 255.0 if m.max() <= 255 else float(np.iinfo(m.dtype).max)
+        top = int(m.max()) if m.size else 0
+        if top <= 1:  # a 0/1 label map
+            full = 1.0
+        elif top <= 255:
+            full = 255.0
+        else:
+            full = float(np.iinfo(m.dtype).max)
         return m.astype(np.float32) / full
     m = m.astype(np.float32)
     top = float(np.nanmax(m)) if m.size else 1.0
     return m / top if top > 1.0 else m
+
+
+def to_uint8(image: np.ndarray) -> np.ndarray:
+    """An 8-bit copy of a photo of any depth: 16-bit and float images are
+    scaled by their range rather than cast (which would wrap or go black)."""
+    img = np.asarray(image)
+    if img.dtype == np.uint8:
+        return img
+    if img.dtype == bool:
+        return img.astype(np.uint8) * 255
+    f = img.astype(np.float32)
+    if np.issubdtype(img.dtype, np.integer):
+        top = 255.0 if f.max() <= 255 else float(np.iinfo(img.dtype).max)
+        return np.clip(f / top * 255.0, 0, 255).astype(np.uint8)
+    lo, hi = float(np.nanmin(f)), float(np.nanmax(f))
+    if lo >= 0.0 and hi <= 1.0:
+        lo, hi = 0.0, 1.0
+    scale = 255.0 / (hi - lo) if hi > lo else 0.0
+    return np.clip((np.nan_to_num(f) - lo) * scale, 0, 255).astype(np.uint8)
 
 
 def binarize(
@@ -120,6 +145,7 @@ def clean(mask: np.ndarray, min_area: int = 20, fill_holes: float = -1) -> Tuple
 
 __all__ = [
     "to_float",
+    "to_uint8",
     "binarize",
     "distance",
     "width_estimate",

@@ -133,10 +133,20 @@ def load_lines(path: str) -> Dict[str, Any]:
     img = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
     if img is None:
         raise FileNotFoundError(path)
+    from .geometry import smooth
+    from .graph import from_skeleton
+
     sk = skeletonize(img > 127)
     ys, xs = np.nonzero(sk)
     pts = np.column_stack([xs, ys]).astype(float)
-    return dict(points=pts, widths=None, junctions=None, endpoints=None, length=float(len(pts)), polylines=None)
+    # length along each run of the line, smoothed like a trace is, so a
+    # diagonal is neither cut short (pixel count) nor staircased
+    g = from_skeleton(sk)
+    total = 0.0
+    for e in g.edges.values():
+        q, _ = resample(e.pts, 1.0)
+        total += poly_length(smooth(q, 2.0, closed=e.u == e.v and len(q) > 6))
+    return dict(points=pts, widths=None, junctions=None, endpoints=None, length=total, polylines=None)
 
 
 def lines_from_dict(d: Dict[str, Any]) -> Dict[str, Any]:

@@ -25,7 +25,7 @@ from . import graph as G
 from .config import TraceConfig
 from .corners import corner_graph
 from .geometry import cross_widths, normals, resample, smooth
-from .mask import binarize, clean, distance
+from .mask import binarize, clean, distance, to_uint8
 from .result import Crack, Path, TraceResult
 
 ArrayLike = Union[np.ndarray, str]
@@ -50,11 +50,9 @@ def _radius_fn(dt: np.ndarray):
 def _to_gray(image: Optional[np.ndarray], shape: Tuple[int, int]) -> Optional[np.ndarray]:
     if image is None:
         return None
-    img = np.asarray(image)
+    img = to_uint8(np.asarray(image))
     if img.ndim == 3:
-        img = cv2.cvtColor(img[..., :3].astype(np.uint8), cv2.COLOR_BGR2GRAY)
-    if img.dtype != np.uint8:
-        img = cv2.normalize(img.astype(np.float32), None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        img = cv2.cvtColor(np.ascontiguousarray(img[..., :3]), cv2.COLOR_BGR2GRAY)
     if img.shape != shape:
         img = cv2.resize(img, (shape[1], shape[0]), interpolation=cv2.INTER_AREA)
     return img
@@ -156,7 +154,13 @@ def _finish_path(
         wv = np.where(np.isfinite(width), width, np.nan)
         good = np.isfinite(wv)
         w_out = np.interp(s_new, s_old[good], wv[good]) if good.sum() >= 2 else np.full(len(out), np.nan)
-        return out, w_out, fo if fo is not None else np.zeros(len(out) - 1, bool)
+        fo = fo if fo is not None else np.zeros(len(out) - 1, bool)
+        # a bridge crosses a gap in the mask: it has no width to report
+        gap = np.zeros(len(out), bool)
+        gap[:-1] |= fo
+        gap[1:] |= fo
+        w_out = np.where(gap, np.nan, w_out)
+        return out, w_out, fo
     return p1, width, f1 if f1 is not None else np.zeros(max(len(p1) - 1, 0), bool)
 
 

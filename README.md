@@ -74,7 +74,7 @@ Width barely moves the result: across single cracks from 1.5 to 32 px wide, v1's
 On real masks there is no true line to score against, so I ran two checks on all 458 hand-drawn masks of the Concrete Crack Segmentation Dataset (8 and 12 megapixels each):
 
 - **What it finds.** 1,008 cracks; branches in 416 of the 458 images; 126 breaks in the masks bridged. The corner fallback was never needed. Each mask takes a median 0.63 s on one core of a laptop CPU.
-- **How steady it is.** I damaged each mask the way a weaker model would leave it (ragged edges, breaks, pinholes, specks) and traced it again. Against the trace of the undamaged mask, the new trace scores a mean F1 of 0.96 within 3 px, sits a median 0.86 px away, and its total length changes by a median 0.75%.
+- **How steady it is.** I damaged each mask the way a weaker model would leave it (ragged edges, breaks, pinholes, specks) and traced it again. Against the trace of the undamaged mask, the new trace scores a mean F1 of 0.96 within 3 px, sits a median 0.86 px away, and its total length changes by a median 0.74%.
 
 ![Three more walls from the dataset with their cracks traced and coloured by width, rings at the junctions](docs/media/real-gallery.jpg)
 
