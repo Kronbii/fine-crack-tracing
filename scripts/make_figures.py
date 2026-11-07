@@ -153,7 +153,7 @@ def stages(mask, out, crop=None, photo=None):
     res = trace(mask, photo)
 
     H, W = m.shape
-    lw = max(2, int(round(max(H, W) / 500)))
+    lw = max(3, int(round(max(H, W) / 140)))
     a = _mask_canvas(m)
     from scipy.spatial import cKDTree
 
@@ -338,7 +338,7 @@ def gallery(real_dir, names, out, height=900):
     for n in names:
         mask, photo = _load_real(real_dir, n)
         res = trace(mask, photo)
-        img = overlay(res, photo, line=max(4, int(round(max(mask.shape) / 600))))
+        img = overlay(res, photo, labels=False, legend=False, line=max(6, int(round(max(mask.shape) / 230))))
         s = height / img.shape[0]
         tiles.append(cv2.resize(img, None, fx=s, fy=s, interpolation=cv2.INTER_AREA))
         tiles.append(np.full((height, 12, 3), 12, np.uint8))

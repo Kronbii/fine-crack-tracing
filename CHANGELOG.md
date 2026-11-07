@@ -12,7 +12,7 @@ A rebuild around the approach the toolkit ended up with in practice: skeletonise
 - **End extension.** Free ends are carried out to the tip of the mask, which the skeleton stops one half-width short of.
 - **Trunk and branches.** Every crack is split into its longest run (the trunk) and the branches off it, each with its parent.
 - **Width along the crack.** The mask is sampled across the crack at every point and its edges found to sub-pixel; the same profile re-centres the line.
-- **Smoothing on arc length.** Lengths are measured on a smoothed line, not the pixel staircase that overstates diagonals by up to 8%.
+- **Smoothing on arc length.** Lengths are measured on a line smoothed in proportion to the crack's width, not on the pixel staircase that overstates diagonals by up to 8%. The centring step keeps only the slow part of its shift, so ragged edges are not copied back into the line.
 - **Corner fallback, fixed.** The v0.1 corner tracer is kept as `--method corners` and as the fallback in `auto`. Corners are now walked onto the centreline before they are linked, so a wide crack is traced down its middle rather than around its outline, and the spanning tree keeps its branches.
 - **Physical units** with `--px-size`, and **width classes** (`--width-classes 0.1,0.3,1`) that report the length of crack in each width band.
 - **Outputs**: per-image JSON with full geometry, a CSV row per crack, GeoJSON, SVG, overlays coloured by width, and plain centreline images.
@@ -20,7 +20,7 @@ A rebuild around the approach the toolkit ended up with in practice: skeletonise
 - **`fine-tracing synth`** generates cracks with exact ground truth: centreline, width at every point, junctions and ends, a mask spoilt the way segmentation output tends to be, and a concrete-like photo.
 - **`fine-tracing bench`** runs every tracer, v0.1 included, on the same synthetic cracks and writes tables and charts.
 - **Python API**: `trace(mask, image=None, **settings)` returns a `TraceResult`; settings live in a `TraceConfig`.
-- Tests for the graph, pruning, bridging, widths, mask formats, exports and the CLI, run on Python 3.9 to 3.12 in CI.
+- Tests for the graph, pruning, bridging, widths, mask formats, exports and the CLI, run on Python 3.9, 3.11 and 3.12 in CI.
 
 ### Changed
 
