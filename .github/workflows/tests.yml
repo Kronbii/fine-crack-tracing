@@ -40,7 +40,7 @@ jobs:
           /tmp/clean/bin/fine-tracing trace examples/masks --photos examples/photos -o /tmp/out
           test -s /tmp/out/cracks.csv
           cd /tmp && /tmp/clean/bin/python "$GITHUB_WORKSPACE/examples/quickstart.py"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
