@@ -20,10 +20,21 @@ keywords = [
   "opencv",
 ]
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
   "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Image Processing",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+  "Typing :: Typed",
 ]
 dependencies = [
   "numpy>=1.23",
@@ -39,6 +50,9 @@ dev = ["pytest>=7", "ruff>=0.4", "matplotlib>=3.5"]
 [project.urls]
 Homepage = "https://ramikronbi.com/projects/fine-crack-tracing-toolkit"
 Repository = "https://github.com/Kronbii/fine-crack-tracing"
+Documentation = "https://github.com/Kronbii/fine-crack-tracing#readme"
+Changelog = "https://github.com/Kronbii/fine-crack-tracing/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Kronbii/fine-crack-tracing/issues"
 
 [project.scripts]
 fine-tracing = "fine_tracing.cli:main"

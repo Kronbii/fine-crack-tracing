@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- `fine-tracing --help` lists only the current commands, with examples; `--method` has a description.
+- Docs: a reference for every output field ([docs/output-format.md](docs/output-format.md)), a contributor guide, a citation file, an animated preview of the tracer, and [examples/quickstart.py](examples/quickstart.py).
+- CI also builds the wheel, installs it on its own and traces the examples with it; Dependabot keeps the CI actions current.
+- Package metadata: supported Python versions, typing marker, and links to the changelog, docs and issues.
+
 ## 1.0.0
 
 A rebuild around the approach the toolkit ended up with in practice: skeletonise the mask, and fall back to Shi-Tomasi corners only where a skeleton cannot describe a crack.

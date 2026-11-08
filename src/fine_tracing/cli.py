@@ -24,6 +24,16 @@ from .result import finite
 
 FORMATS = ("overlay", "json", "csv", "geojson", "svg", "centreline")
 
+EXAMPLES = """examples:
+  fine-tracing trace masks/ --photos photos/ -o results/
+  fine-tracing trace masks/ -o results/ --px-size 0.08 --width-classes 0.1,0.3,1
+  fine-tracing eval results/json reference/ --tol 3 -o scores/
+  fine-tracing synth data/synthetic -n 40 --preset realistic
+  fine-tracing bench -o bench/ -j 8
+
+docs: https://github.com/Kronbii/fine-crack-tracing#readme
+"""
+
 
 def _floats(s: str) -> List[float]:
     return [float(v) for v in s.replace(" ", "").split(",") if v]
@@ -277,17 +287,26 @@ def cmd_metrics_legacy(a: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="fine-tracing", description="Turn crack masks into measured centrelines.")
+    p = argparse.ArgumentParser(
+        prog="fine-tracing",
+        description="Turn crack masks into measured centrelines.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=EXAMPLES,
+    )
     p.add_argument("--version", action="version", version=f"fine-tracing {__version__}")
     # v0.1 took -v/-vv before the subcommand; it is accepted and shows stage timings
     p.add_argument("-v", "--verbose", action="count", default=0, help=argparse.SUPPRESS)
-    sub = p.add_subparsers(dest="command", required=True)
+    sub = p.add_subparsers(dest="command", required=True, metavar="{trace,eval,synth,bench}")
 
     t = sub.add_parser("trace", help="trace the cracks in a mask, or a folder of masks")
     t.add_argument("masks", help="mask file or folder")
     t.add_argument("--photos", help="photo file or folder, matched to masks by file name")
     t.add_argument("-o", "--output", default="results", help="output folder (default: results)")
-    t.add_argument("--method", choices=METHODS)
+    t.add_argument(
+        "--method",
+        choices=METHODS,
+        help="skeleton, corners, or auto: skeleton with corners for any crack it cannot describe (default)",
+    )
     t.add_argument("--px-size", type=float, help="size of one pixel in --unit, e.g. 0.1")
     t.add_argument("--unit", help="unit for --px-size (default: mm)")
     t.add_argument("--width-classes", help="width class edges in output units, e.g. 0.1,0.3,1")
@@ -333,13 +352,14 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("-j", "--workers", type=int, default=1)
     b.set_defaults(func=cmd_bench)
 
-    r = sub.add_parser("run", help=argparse.SUPPRESS)
+    # v0.1 spellings, kept working but out of the help
+    r = sub.add_parser("run")
     r.add_argument("--frames-dir", required=True)
     r.add_argument("--masks-dir", required=True)
     r.add_argument("--output-dir", required=True)
     r.set_defaults(func=cmd_run_legacy)
 
-    mt = sub.add_parser("metrics", help=argparse.SUPPRESS)
+    mt = sub.add_parser("metrics")
     mt.add_argument("--ground-truth", required=True)
     mt.add_argument("--generated", required=True)
     mt.add_argument("--output-dir", default="scores")

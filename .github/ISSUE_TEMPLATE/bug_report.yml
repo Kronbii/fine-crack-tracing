@@ -1,0 +1,28 @@
+name: Something traced badly, or broke
+description: A crack that came out wrong, an error, or a result that looks off
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `fine-tracing --version`
+      placeholder: fine-tracing 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or code
+      description: The command you ran, or the call to `trace()`, with its settings
+      render: shell
+  - type: textarea
+    id: files
+    attributes:
+      label: Mask, photo, output
+      description: Drag in the mask (and photo, if used) that went wrong, and the overlay it produced. Crop them if the rest is private.
